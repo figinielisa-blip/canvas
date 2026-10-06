@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Agent: Mission Self-Intro</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Tone.js for audio sound effects -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            purple: '#6C5CE7',
+                            yellow: '#FDCB6E',
+                            pink: '#FD79A8',
+                            blue: '#0984E3',
+                            green: '#00B894',
+                            dark: '#2D3436'
+                        }
+                    },
+                    fontFamily: {
+                        fredoka: ['Fredoka', 'sans-serif'],
+                        nunito: ['Nunito', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #a8c0ff 0%, #3f2b96 100%);
+            min-height: 100vh;
+            user-select: none;
+        }
+        .title-font {
+            font-family: 'Fredoka', sans-serif;
+        }
+        .bounce-hover:hover {
+            transform: translateY(-4px) scale(1.02);
+            transition: all 0.2s ease;
+        }
+        .card-shadow {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        }
+        .pulse-subtle {
+            animation: pulse-animation 2s infinite;
+        }
+        @keyframes pulse-animation {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-between min-h-screen p-3 md:p-6 text-slate-800">
+
+    <div class="w-full max-w-4xl bg-white/95 backdrop-blur-md rounded-3xl p-4 md:p-8 card-shadow my-auto flex flex-col justify-between min-h-[85vh]">
+        
+        <!-- Header / Top Bar -->
+        <header class="flex flex-wrap justify-between items-center pb-4 border-b-2 border-slate-100 gap-3">
+            <div class="flex items-center space-x-3">
+                <div class="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center text-white text-2xl shadow-md">
+                    <i class="fa-solid fa-user-secret"></i>
+                </div>
+                <div>
+                    <h1 class="title-font text-xl md:text-2xl font-bold text-indigo-900 tracking-wide">English Agent</h1>
+                    <p class="text-xs md:text-sm text-slate-500 font-semibold">Mission: Self-Introduction</p>
+                </div>
+            </div>
+
+            <div id="stats-bar" class="hidden flex items-center gap-3 bg-slate-100 px-4 py-2 rounded-2xl">
+                <div class="flex items-center text-amber-500 font-bold text-lg">
+                    <i class="fa-solid fa-star mr-1 text-xl"></i>
+                    <span id="score">0</span>
+                </div>
+                <div class="h-6 w-0.5 bg-slate-300"></div>
+                <div class="flex items-center text-rose-500 font-bold text-lg">
+                    <i class="fa-solid fa-heart mr-1"></i>
+                    <span id="lives">3</span>
+                </div>
+                <div class="h-6 w-0.5 bg-slate-300"></div>
+                <button id="speech-toggle" onclick="toggleSpeech()" class="text-indigo-600 hover:text-indigo-800 text-xl focus:outline-none" title="Audio Pronuncia">
+                    <i class="fa-solid fa-volume-high"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="my-6 flex-grow flex flex-col justify-center">
+
+            <!-- SCREEN 0: Welcome Screen -->
+            <section id="screen-welcome" class="text-center space-y-6 py-4">
+                <div class="inline-block p-4 bg-indigo-100 rounded-full text-indigo-600 mb-2">
+                    <i class="fa-solid fa-graduation-cap text-5xl"></i>
+                </div>
+                <h2 class="title-font text-3xl md:text-4xl font-extrabold text-slate-800">
+                    Diventa un Agente Segreto dell'Inglese! 🕵️‍♂️
+                </h2>
+                <p class="text-base md:text-lg text-slate-600 max-w-xl mx-auto">
+                    Impara a fare e comprendere le domande per presentare te stesso. Completa le 3 missioni per sbloccare il tuo <strong>Tesserino d'Agente Ufficiale</strong>!
+                </p>
+
+                <!-- Avatar Selection & Agent Name -->
+                <div class="max-w-md mx-auto bg-slate-50 p-6 rounded-2xl border border-slate-200 text-left space-y-4">
+                    <label class="block text-sm font-bold text-slate-700">Inserisci il tuo nome da Agente:</label>
+                    <input type="text" id="player-name" placeholder="Es. Agente Marco" class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-lg font-semibold">
+                    
+                    <label class="block text-sm font-bold text-slate-700">Scegli il tuo Avatar:</label>
+                    <div class="flex justify-around text-3xl">
+                        <button onclick="selectAvatar('🐱')" class="avatar-btn p-3 rounded-xl bg-white border-2 border-slate-200 hover:border-indigo-500 focus:border-indigo-600 transition">🐱</button>
+                        <button onclick="selectAvatar('🐶')" class="avatar-btn p-3 rounded-xl bg-white border-2 border-slate-200 hover:border-indigo-500 focus:border-indigo-600 transition">🐶</button>
+                        <button onclick="selectAvatar('🦊')" class="avatar-btn p-3 rounded-xl bg-white border-2 border-slate-200 hover:border-indigo-500 focus:border-indigo-600 transition">🦊</button>
+                        <button onclick="selectAvatar('🤖')" class="avatar-btn p-3 rounded-xl bg-white border-2 border-slate-200 hover:border-indigo-500 focus:border-indigo-600 transition">🤖</button>
+                        <button onclick="selectAvatar('🦄')" class="avatar-btn p-3 rounded-xl bg-white border-2 border-slate-200 hover:border-indigo-500 focus:border-indigo-600 transition">🦄</button>
+                    </div>
+                </div>
+
+                <button onclick="startGame()" class="title-font bounce-hover px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xl rounded-2xl shadow-lg shadow-indigo-200 transition">
+                    Inizia la Missione! <i class="fa-solid fa-arrow-right ml-2"></i>
+                </button>
+            </section>
+
+            <!-- SCREEN 1: Mission 1 - Match Questions & Answers -->
+            <section id="screen-match" class="hidden space-y-6">
+                <div class="text-center space-y-1">
+                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold rounded-full uppercase tracking-wider">Missione 1 di 3</span>
+                    <h3 class="title-font text-2xl font-bold text-slate-800">Match the Pairs! 🔗</h3>
+                    <p class="text-slate-600 text-sm">Clicca prima sulla domanda (a sinistra) e poi sulla sua risposta corretta (a destra).</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Questions Column -->
+                    <div id="match-questions" class="space-y-3">
+                        <!-- Dynamic content -->
+                    </div>
+                    <!-- Answers Column -->
+                    <div id="match-answers" class="space-y-3">
+                        <!-- Dynamic content -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- SCREEN 2: Mission 2 - Unscramble Sentence -->
+            <section id="screen-unscramble" class="hidden space-y-6 text-center">
+                <div class="space-y-1">
+                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold rounded-full uppercase tracking-wider">Missione 2 di 3</span>
+                    <h3 class="title-font text-2xl font-bold text-slate-800">Build the Question! 🧩</h3>
+                    <p class="text-slate-600 text-sm">Ordina le parole per formare la domanda corretta.</p>
+                </div>
+
+                <!-- Italian hint -->
+                <div class="bg-amber-50 border border-amber-200 p-3 rounded-xl max-w-md mx-auto text-amber-800 font-medium text-sm flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-lightbulb text-amber-500 text-lg"></i>
+                    <span>Traduzione: "<strong id="unscramble-hint">...</strong>"</span>
+                </div>
+
+                <!-- Drop Target / Formed sentence area -->
+                <div id="unscramble-target" class="min-h-[70px] p-4 bg-slate-100 rounded-2xl border-2 border-dashed border-indigo-300 flex flex-wrap items-center justify-center gap-2 transition">
+                    <span class="text-slate-400 italic text-sm" id="target-placeholder">Clicca sulle parole qui sotto nell'ordine giusto...</span>
+                </div>
+
+                <!-- Word pool -->
+                <div id="unscramble-pool" class="flex flex-wrap justify-center gap-3 min-h-[60px] p-2">
+                    <!-- Dynamic word buttons -->
+                </div>
+
+                <div class="flex justify-center gap-4 pt-2">
+                    <button onclick="resetUnscramble()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-xl transition text-sm">
+                        <i class="fa-solid fa-rotate-left mr-1"></i> Ricomincia
+                    </button>
+                    <button onclick="checkUnscramble()" class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-md transition text-sm">
+                        Conferma <i class="fa-solid fa-check ml-1"></i>
+                    </button>
+                </div>
+            </section>
+
+            <!-- SCREEN 3: Mission 3 - Fill in Wh- Question Words -->
+            <section id="screen-wh" class="hidden space-y-6 text-center">
+                <div class="space-y-1">
+                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold rounded-full uppercase tracking-wider">Missione 3 di 3</span>
+                    <h3 class="title-font text-2xl font-bold text-slate-800">Detective Words! 🔍</h3>
+                    <p class="text-slate-600 text-sm">Scegli la parola interrogativa mancante (*Question Word*).</p>
+                </div>
+
+                <div class="bg-indigo-50 border border-indigo-100 p-6 rounded-2xl max-w-lg mx-auto space-y-4">
+                    <div class="text-2xl font-bold text-indigo-900 flex items-center justify-center gap-2">
+                        <span id="wh-question-text">____ is your birthday?</span>
+                        <button onclick="speakText(currentWhQuestion.full)" class="text-indigo-500 hover:text-indigo-700 text-xl focus:outline-none">
+                            <i class="fa-solid fa-volume-high"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="bg-white p-3 rounded-xl border border-indigo-100 text-slate-600 text-sm">
+                        💬 Risposta guida: <span id="wh-answer-text" class="font-bold text-slate-800">"It's in May."</span>
+                    </div>
+                </div>
+
+                <!-- Multiple choice options -->
+                <div id="wh-options" class="grid grid-cols-2 md:grid-cols-3 gap-3 max-w-md mx-auto">
+                    <!-- Dynamic choices -->
+                </div>
+            </section>
+
+            <!-- SCREEN 4: Final Stage - Agent ID Card Creator -->
+            <section id="screen-id-card" class="hidden space-y-6">
+                <div class="text-center space-y-1">
+                    <span class="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-full uppercase tracking-wider">Missione Completa! 🎉</span>
+                    <h3 class="title-font text-3xl font-bold text-slate-800">Crea la tua Carta d'Identità in Inglese</h3>
+                    <p class="text-slate-600 text-sm">Rispondi alle domande su te stesso per stampare il tuo tesserino finale!</p>
+                </div>
+
+                <div class="max-w-xl mx-auto bg-slate-50 p-6 rounded-2xl border border-slate-200 space-y-4 text-sm">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block font-bold text-slate-700 mb-1">What's your age? (How old are you?)</label>
+                            <input type="number" id="id-age" value="10" min="8" max="14" class="w-full p-2.5 rounded-xl border border-slate-300 outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-700 mb-1">Where do you live?</label>
+                            <input type="text" id="id-city" placeholder="e.g. Rome, Milan, Italy" class="w-full p-2.5 rounded-xl border border-slate-300 outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-700 mb-1">What is your favourite colour?</label>
+                            <select id="id-color" class="w-full p-2.5 rounded-xl border border-slate-300 outline-none focus:ring-2 focus:ring-indigo-500">
+                                <option value="Blue">Blue 🟦</option>
+                                <option value="Red">Red 🟥</option>
+                                <option value="Green">Green 🟩</option>
+                                <option value="Yellow">Yellow 🟨</option>
+                                <option value="Purple">Purple 🟪</option>
+                                <option value="Pink">Pink 🌸</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-700 mb-1">Have you got a pet?</label>
+                            <select id="id-pet" class="w-full p-2.5 rounded-xl border border-slate-300 outline-none focus:ring-2 focus:ring-indigo-500">
+                                <option value="a dog">Yes, a dog 🐶</option>
+                                <option value="a cat">Yes, a cat 🐱</option>
+                                <option value="a hamster">Yes, a hamster 🐹</option>
+                                <option value="a fish">Yes, a fish 🐟</option>
+                                <option value="no pets">No pets 🚫</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">What is your favourite school subject?</label>
+                        <select id="id-subject" class="w-full p-2.5 rounded-xl border border-slate-300 outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="English">English 🇬🇧</option>
+                            <option value="Maths">Maths 📐</option>
+                            <option value="Science">Science 🔬</option>
+                            <option value="Art">Art 🎨</option>
+                            <option value="P.E. (Physical Education)">P.E. ⚽</option>
+                            <option value="History">History 📜</option>
+                        </select>
+                    </div>
+
+                    <button onclick="generateBadge()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg transition text-base title-font">
+                        Genera Tesserino Agente <i class="fa-solid fa-id-card ml-2"></i>
+                    </button>
+                </div>
+            </section>
+
+            <!-- SCREEN 5: Badge Display Modal / Printable Card -->
+            <section id="screen-badge" class="hidden space-y-6 text-center">
+                <div class="space-y-1">
+                    <h3 class="title-font text-3xl font-extrabold text-indigo-900">Complimenti, Agente Ufficiale! ⭐</h3>
+                    <p class="text-slate-600 text-sm">Ecco il tuo tesserino personale generato con i tuoi dati in inglese.</p>
+                </div>
+
+                <!-- ID Card graphic -->
+                <div class="max-w-md mx-auto bg-gradient-to-br from-indigo-900 via-indigo-800 to-slate-900 text-white rounded-3xl p-6 shadow-2xl border-4 border-amber-400 relative overflow-hidden">
+                    <!-- Card Background Watermark -->
+                    <i class="fa-solid fa-shield-halved absolute -bottom-10 -right-10 text-9xl opacity-10 text-white"></i>
+
+                    <div class="flex justify-between items-center border-b border-indigo-700 pb-3 mb-4">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-user-secret text-amber-400 text-2xl"></i>
+                            <span class="title-font text-lg font-bold tracking-wider text-amber-400">ENGLISH AGENT ID</span>
+                        </div>
+                        <span class="text-xs bg-indigo-700 px-2 py-1 rounded text-indigo-200">GRADE 5 SPECIALIST</span>
+                    </div>
+
+                    <div class="flex gap-4 items-center">
+                        <div class="w-20 h-20 bg-white/10 rounded-2xl border-2 border-amber-400 flex items-center justify-center text-4xl shadow-inner">
+                            <span id="badge-avatar">🐱</span>
+                        </div>
+                        <div class="text-left space-y-1">
+                            <h4 id="badge-name" class="title-font text-2xl font-extrabold text-white">Agent Name</h4>
+                            <p class="text-xs text-amber-300 font-semibold"><i class="fa-solid fa-star mr-1"></i>Punteggio Finale: <span id="badge-score">0</span> punti</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-4 border-t border-indigo-700/60 text-left grid grid-cols-1 gap-2 text-xs md:text-sm">
+                        <p>🔹 <strong>Age:</strong> <span id="badge-age-text" class="text-indigo-200">I am 10 years old.</span></p>
+                        <p>🔹 <strong>Location:</strong> <span id="badge-city-text" class="text-indigo-200">I live in Italy.</span></p>
+                        <p>🔹 <strong>Favourite Colour:</strong> <span id="badge-color-text" class="text-indigo-200">My favourite colour is Blue.</span></p>
+                        <p>🔹 <strong>Pet:</strong> <span id="badge-pet-text" class="text-indigo-200">I have got a dog.</span></p>
+                        <p>🔹 <strong>Favourite Subject:</strong> <span id="badge-subject-text" class="text-indigo-200">My favourite subject is English.</span></p>
+                    </div>
+
+                    <div class="mt-5 flex justify-between items-center pt-2 text-[10px] text-slate-400">
+                        <span>ISSUED BY: SCUOLA PRIMARIA</span>
+                        <span>VALID: FOREVER</span>
+                    </div>
+                </div>
+
+                <div class="flex justify-center gap-4">
+                    <button onclick="speakBadgeText()" class="px-5 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition shadow">
+                        <i class="fa-solid fa-volume-high mr-2"></i> Ascolta Presentazione
+                    </button>
+                    <button onclick="restartGame()" class="px-5 py-3 bg-slate-700 hover:bg-slate-800 text-white font-bold rounded-xl transition shadow">
+                        <i class="fa-solid fa-rotate-right mr-2"></i> Gioca Ancora
+                    </button>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Footer Info -->
+        <footer class="pt-4 border-t border-slate-100 text-center text-xs text-slate-400 flex justify-between items-center">
+            <span>Inglese per la 5ª Primaria - Presentazione di Sé</span>
+            <span id="level-indicator" class="font-bold text-indigo-600">Home</span>
+        </footer>
+
+    </div>
+
+    <!-- Feedback Message Overlay Box -->
+    <div id="feedback-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-3xl p-6 max-w-sm w-full text-center space-y-4 shadow-2xl transform transition-all scale-95">
+            <div id="feedback-icon" class="w-16 h-16 rounded-full flex items-center justify-center mx-auto text-3xl">
+                <i class="fa-solid fa-check"></i>
+            </div>
+            <h3 id="feedback-title" class="title-font text-2xl font-bold">Ottimo Lavoro!</h3>
+            <p id="feedback-msg" class="text-slate-600 text-sm">Hai risposto correttamente!</p>
+            <button onclick="closeFeedback()" class="w-full py-3 bg-indigo-600 text-white font-bold rounded-xl shadow-md">
+                Continua <i class="fa-solid fa-arrow-right ml-1"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Audio Synthesizer setup using Tone.js
+        let synth;
+        let isAudioMuted = false;
+
+        function initAudio() {
+            if (!synth) {
+                synth = new Tone.Synth().toDestination();
+            }
+        }
+
+        function playSound(type) {
+            try {
+                initAudio();
+                if (Tone.context.state !== 'running') {
+                    Tone.start();
+                }
+                if (type === 'correct') {
+                    const now = Tone.now();
+                    synth.triggerAttackRelease("C5", "8n", now);
+                    synth.triggerAttackRelease("G5", "8n", now + 0.15);
+                } else if (type === 'wrong') {
+                    const now = Tone.now();
+                    synth.triggerAttackRelease("G3", "8n", now);
+                    synth.triggerAttackRelease("C3", "8n", now + 0.15);
+                } else if (type === 'win') {
+                    const now = Tone.now();
+                    synth.triggerAttackRelease("C4", "8n", now);
+                    synth.triggerAttackRelease("E4", "8n", now + 0.1);
+                    synth.triggerAttackRelease("G4", "8n", now + 0.2);
+                    synth.triggerAttackRelease("C5", "4n", now + 0.3);
+                }
+            } catch (e) {
+                console.log("Audio play error:", e);
+            }
+        }
+
+        // Web Speech API for English Speech Synthesis
+        function speakText(text) {
+            if ('speechSynthesis' in window && !isAudioMuted) {
+                window.speechSynthesis.cancel(); // Stop current speech
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.85; // Slightly slower for primary kids
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function toggleSpeech() {
+            isAudioMuted = !isAudioMuted;
+            const btn = document.getElementById('speech-toggle');
+            if (isAudioMuted) {
+                btn.innerHTML = `<i class="fa-solid fa-volume-xmark text-slate-400"></i>`;
+            } else {
+                btn.innerHTML = `<i class="fa-solid fa-volume-high text-indigo-600"></i>`;
+            }
+        }
+
+        // Game State Variables
+        let playerName = "Agente";
+        let selectedAvatar = "🐱";
+        let score = 0;
+        let lives = 3;
+        let currentStage = 0; // 0: welcome, 1: match, 2: unscramble, 3: wh, 4: id-form, 5: badge
+
+        // Datasets for Grade 5 Primary School
+        const matchData = [
+            { id: 1, q: "What is your name?", a: "My name is Alex.", pair: "A" },
+            { id: 2, q: "How old are you?", a: "I am 10 years old.", pair: "B" },
+            { id: 3, q: "Where do you live?", a: "I live in Rome.", pair: "C" },
+            { id: 4, q: "Have you got any pets?", a: "Yes, I have got a cat.", pair: "D" },
+            { id: 5, q: "What is your favourite subject?", a: "My favourite subject is Art.", pair: "E" }
+        ];
+
+        const unscrambleData = [
+            { words: ["What", "is", "your", "name", "?"], hint: "Come ti chiami?" },
+            { words: ["How", "old", "are", "you", "?"], hint: "Quanti anni hai?" },
+            { words: ["Where", "do", "you", "live", "?"], hint: "Dove vivi?" },
+            { words: ["When", "is", "your", "birthday", "?"], hint: "Quando è il tuo compleanno?" },
+            { words: ["Have", "you", "got", "a", "dog", "?"], hint: "Hai un cane?" }
+        ];
+
+        const whData = [
+            { questionText: "____ is your favourite colour?", missing: "What", full: "What is your favourite colour?", answerText: "My favourite colour is blue.", options: ["What", "Where", "When", "Who"] },
+            { questionText: "____ do you live?", missing: "Where", full: "Where do you live?", answerText: "I live in Italy.", options: ["Where", "What", "How", "When"] },
+            { questionText: "____ old are you?", missing: "How", full: "How old are you?", answerText: "I am 10 years old.", options: ["How", "What", "Who", "Where"] },
+            { questionText: "____ is your birthday?", missing: "When", full: "When is your birthday?", answerText: "It's in September.", options: ["When", "What", "Where", "Have"] },
+            { questionText: "____ you got any brothers?", missing: "Have", full: "Have you got any brothers?", answerText: "Yes, I have got one brother.", options: ["Have", "Are", "Do", "What"] }
+        ];
+
+        // State trackers for current questions
+        let currentUnscrambleIndex = 0;
+        let selectedUnscrambleWords = [];
+
+        let currentWhIndex = 0;
+        let currentWhQuestion = null;
+
+        // Match Game State
+        let selectedQuestionCard = null;
+        let selectedAnswerCard = null;
+        let matchedPairsCount = 0;
+
+        function selectAvatar(emoji) {
+            selectedAvatar = emoji;
+            document.querySelectorAll('.avatar-btn').forEach(btn => {
+                btn.classList.remove('border-indigo-600', 'bg-indigo-50');
+            });
+            event.currentTarget.classList.add('border-indigo-600', 'bg-indigo-50');
+        }
+
+        function updateStatsUI() {
+            document.getElementById('score').innerText = score;
+            document.getElementById('lives').innerText = lives;
+        }
+
+        function showScreen(screenId) {
+            const screens = ['screen-welcome', 'screen-match', 'screen-unscramble', 'screen-wh', 'screen-id-card', 'screen-badge'];
+            screens.forEach(s => {
+                document.getElementById(s).classList.add('hidden');
+            });
+            document.getElementById(screenId).classList.remove('hidden');
+
+            const statsBar = document.getElementById('stats-bar');
+            if (screenId === 'screen-welcome') {
+                statsBar.classList.add('hidden');
+                document.getElementById('level-indicator').innerText = "Home";
+            } else {
+                statsBar.classList.remove('hidden');
+                if (screenId === 'screen-match') document.getElementById('level-indicator').innerText = "Missione 1: Match";
+                else if (screenId === 'screen-unscramble') document.getElementById('level-indicator').innerText = "Missione 2: Question Builder";
+                else if (screenId === 'screen-wh') document.getElementById('level-indicator').innerText = "Missione 3: Wh- Words";
+                else if (screenId === 'screen-id-card') document.getElementById('level-indicator').innerText = "Tesserino Agente";
+                else if (screenId === 'screen-badge') document.getElementById('level-indicator').innerText = "Agente Certificato!";
+            }
+        }
+
+        function startGame() {
+            const inputName = document.getElementById('player-name').value.trim();
+            playerName = inputName !== "" ? inputName : "Agente 007";
+            score = 0;
+            lives = 3;
+            updateStatsUI();
+
+            // Go to Stage 1
+            startMatchMission();
+        }
+
+        function showFeedback(isSuccess, title, msg, onNext) {
+            playSound(isSuccess ? 'correct' : 'wrong');
+            const modal = document.getElementById('feedback-modal');
+            const icon = document.getElementById('feedback-icon');
+            const titleEl = document.getElementById('feedback-title');
+            const msgEl = document.getElementById('feedback-msg');
+
+            if (isSuccess) {
+                icon.className = "w-16 h-16 rounded-full flex items-center justify-center mx-auto text-3xl bg-emerald-100 text-emerald-600";
+                icon.innerHTML = `<i class="fa-solid fa-check"></i>`;
+            } else {
+                icon.className = "w-16 h-16 rounded-full flex items-center justify-center mx-auto text-3xl bg-rose-100 text-rose-600";
+                icon.innerHTML = `<i class="fa-solid fa-xmark"></i>`;
+            }
+
+            titleEl.innerText = title;
+            msgEl.innerText = msg;
+            modal.classList.remove('hidden');
+
+            window.nextCallback = onNext;
+        }
+
+        function closeFeedback() {
+            document.getElementById('feedback-modal').classList.add('hidden');
+            if (window.nextCallback) {
+                window.nextCallback();
+                window.nextCallback = null;
+            }
+        }
+
+        // STAGE 1: MATCH GAME
+        function startMatchMission() {
+            showScreen('screen-match');
+            matchedPairsCount = 0;
+            selectedQuestionCard = null;
+            selectedAnswerCard = null;
+
+            const qContainer = document.getElementById('match-questions');
+            const aContainer = document.getElementById('match-answers');
+
+            qContainer.innerHTML = '';
+            aContainer.innerHTML = '';
+
+            // Shuffle questions and answers independently
+            const shuffledQ = [...matchData].sort(() => Math.random() - 0.5);
+            const shuffledA = [...matchData].sort(() => Math.random() - 0.5);
+
+            shuffledQ.forEach(item => {
+                const btn = document.createElement('button');
+                btn.className = "q-card w-full p-4 bg-white border-2 border-slate-200 rounded-2xl text-left font-bold text-slate-700 hover:border-indigo-400 transition flex justify-between items-center";
+                btn.dataset.pair = item.pair;
+                btn.dataset.text = item.q;
+                btn.innerHTML = `<span>${item.q}</span> <i class="fa-solid fa-volume-high text-indigo-400 opacity-0 hover:opacity-100" onclick="event.stopPropagation(); speakText('${item.q}')"></i>`;
+                btn.onclick = () => selectMatchItem(btn, 'question');
+                qContainer.appendChild(btn);
+            });
+
+            shuffledA.forEach(item => {
+                const btn = document.createElement('button');
+                btn.className = "a-card w-full p-4 bg-white border-2 border-slate-200 rounded-2xl text-left font-bold text-slate-700 hover:border-indigo-400 transition flex justify-between items-center";
+                btn.dataset.pair = item.pair;
+                btn.dataset.text = item.a;
+                btn.innerHTML = `<span>${item.a}</span> <i class="fa-solid fa-volume-high text-indigo-400 opacity-0 hover:opacity-100" onclick="event.stopPropagation(); speakText('${item.a}')"></i>`;
+                btn.onclick = () => selectMatchItem(btn, 'answer');
+                aContainer.appendChild(btn);
+            });
+        }
+
+        function selectMatchItem(element, type) {
+            if (element.classList.contains('bg-emerald-100')) return; // Already solved
+
+            if (type === 'question') {
+                document.querySelectorAll('.q-card').forEach(c => c.classList.remove('border-indigo-600', 'bg-indigo-50'));
+                element.classList.add('border-indigo-600', 'bg-indigo-50');
+                selectedQuestionCard = element;
+                speakText(element.dataset.text);
+            } else {
+                document.querySelectorAll('.a-card').forEach(c => c.classList.remove('border-indigo-600', 'bg-indigo-50'));
+                element.classList.add('border-indigo-600', 'bg-indigo-50');
+                selectedAnswerCard = element;
+                speakText(element.dataset.text);
+            }
+
+            // Check match if both selected
+            if (selectedQuestionCard && selectedAnswerCard) {
+                if (selectedQuestionCard.dataset.pair === selectedAnswerCard.dataset.pair) {
+                    // Correct match
+                    playSound('correct');
+                    score += 20;
+                    updateStatsUI();
+
+                    selectedQuestionCard.className = "w-full p-4 bg-emerald-100 border-2 border-emerald-500 text-emerald-800 font-bold rounded-2xl text-left flex justify-between items-center cursor-default";
+                    selectedAnswerCard.className = "w-full p-4 bg-emerald-100 border-2 border-emerald-500 text-emerald-800 font-bold rounded-2xl text-left flex justify-between items-center cursor-default";
+                    
+                    selectedQuestionCard.innerHTML += ` <i class="fa-solid fa-circle-check text-emerald-600"></i>`;
+                    selectedAnswerCard.innerHTML += ` <i class="fa-solid fa-circle-check text-emerald-600"></i>`;
+
+                    selectedQuestionCard = null;
+                    selectedAnswerCard = null;
+                    matchedPairsCount++;
+
+                    if (matchedPairsCount === matchData.length) {
+                        setTimeout(() => {
+                            showFeedback(true, "Missione 1 Completata!", "Hai abbinato tutte le domande e risposte! Passiamo alla Missione 2.", () => {
+                                startUnscrambleMission();
+                            });
+                        }, 500);
+                    }
+                } else {
+                    // Wrong match
+                    playSound('wrong');
+                    lives--;
+                    updateStatsUI();
+                    
+                    const qEl = selectedQuestionCard;
+                    const aEl = selectedAnswerCard;
+                    qEl.classList.add('border-rose-500', 'bg-rose-50');
+                    aEl.classList.add('border-rose-500', 'bg-rose-50');
+
+                    setTimeout(() => {
+                        qEl.classList.remove('border-rose-500', 'bg-rose-50', 'border-indigo-600', 'bg-indigo-50');
+                        aEl.classList.remove('border-rose-500', 'bg-rose-50', 'border-indigo-600', 'bg-indigo-50');
+                    }, 800);
+
+                    selectedQuestionCard = null;
+                    selectedAnswerCard = null;
+
+                    if (lives <= 0) {
+                        handleGameOver();
+                    }
+                }
+            }
+        }
+
+        // STAGE 2: UNSCRAMBLE GAME
+        function startUnscrambleMission() {
+            showScreen('screen-unscramble');
+            currentUnscrambleIndex = 0;
+            loadUnscrambleQuestion();
+        }
+
+        function loadUnscrambleQuestion() {
+            selectedUnscrambleWords = [];
+            const currentObj = unscrambleData[currentUnscrambleIndex];
+            
+            document.getElementById('unscramble-hint').innerText = currentObj.hint;
+            
+            const targetContainer = document.getElementById('unscramble-target');
+            targetContainer.innerHTML = `<span class="text-slate-400 italic text-sm" id="target-placeholder">Clicca sulle parole qui sotto...</span>`;
+
+            const poolContainer = document.getElementById('unscramble-pool');
+            poolContainer.innerHTML = '';
+
+            // Shuffle words
+            const shuffledWords = [...currentObj.words].sort(() => Math.random() - 0.5);
+
+            shuffledWords.forEach((word, index) => {
+                const btn = document.createElement('button');
+                btn.className = "word-btn px-4 py-2.5 bg-white border-2 border-indigo-200 hover:border-indigo-500 text-indigo-900 font-bold rounded-xl shadow-sm transition text-base";
+                btn.innerText = word;
+                btn.onclick = () => addWordToTarget(word, btn);
+                poolContainer.appendChild(btn);
+            });
+        }
+
+        function addWordToTarget(word, btnElement) {
+            const placeholder = document.getElementById('target-placeholder');
+            if (placeholder) placeholder.remove();
+
+            selectedUnscrambleWords.push(word);
+            btnElement.classList.add('opacity-30', 'pointer-events-none');
+
+            const targetContainer = document.getElementById('unscramble-target');
+            const wordChip = document.createElement('span');
+            wordChip.className = "px-4 py-2 bg-indigo-600 text-white font-bold rounded-xl shadow-md cursor-pointer hover:bg-indigo-700 transition";
+            wordChip.innerText = word;
+            
+            // Allow clicking target chip to remove it
+            wordChip.onclick = () => {
+                wordChip.remove();
+                btnElement.classList.remove('opacity-30', 'pointer-events-none');
+                selectedUnscrambleWords = selectedUnscrambleWords.filter(w => w !== word);
+                if (selectedUnscrambleWords.length === 0) {
+                    targetContainer.innerHTML = `<span class="text-slate-400 italic text-sm" id="target-placeholder">Clicca sulle parole qui sotto...</span>`;
+                }
+            };
+
+            targetContainer.appendChild(wordChip);
+            speakText(word);
+        }
+
+        function resetUnscramble() {
+            loadUnscrambleQuestion();
+        }
+
+        function checkUnscramble() {
+            const currentObj = unscrambleData[currentUnscrambleIndex];
+            const correctSentence = currentObj.words.join(" ");
+            const userSentence = selectedUnscrambleWords.join(" ");
+
+            if (userSentence === correctSentence) {
+                score += 20;
+                updateStatsUI();
+                speakText(correctSentence);
+
+                currentUnscrambleIndex++;
+                if (currentUnscrambleIndex < unscrambleData.length) {
+                    showFeedback(true, "Esatto! 🧩", `Hai costruito: "${correctSentence}"`, () => {
+                        loadUnscrambleQuestion();
+                    });
+                } else {
+                    showFeedback(true, "Missione 2 Completata!", "Bravissimo! Ora affrontiamo l'ultima sfida: i Wh- Words!", () => {
+                        startWhMission();
+                    });
+                }
+            } else {
+                playSound('wrong');
+                lives--;
+                updateStatsUI();
+                showFeedback(false, "Sbagliato!", `La risposta corretta era: "${correctSentence}"`, () => {
+                    if (lives <= 0) {
+                        handleGameOver();
+                    } else {
+                        resetUnscramble();
+                    }
+                });
+            }
+        }
+
+        // STAGE 3: WH- WORDS GAME
+        function startWhMission() {
+            showScreen('screen-wh');
+            currentWhIndex = 0;
+            loadWhQuestion();
+        }
+
+        function loadWhQuestion() {
+            currentWhQuestion = whData[currentWhIndex];
+            document.getElementById('wh-question-text').innerText = currentWhQuestion.questionText;
+            document.getElementById('wh-answer-text').innerText = `"${currentWhQuestion.answerText}"`;
+
+            const optionsContainer = document.getElementById('wh-options');
+            optionsContainer.innerHTML = '';
+
+            currentWhQuestion.options.forEach(option => {
+                const btn = document.createElement('button');
+                btn.className = "p-4 bg-white border-2 border-indigo-200 hover:border-indigo-600 font-bold text-lg text-indigo-900 rounded-2xl shadow-sm hover:shadow-md transition title-font";
+                btn.innerText = option;
+                btn.onclick = () => selectWhOption(option);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function selectWhOption(option) {
+            speakText(option);
+            if (option === currentWhQuestion.missing) {
+                score += 20;
+                updateStatsUI();
+                speakText(currentWhQuestion.full);
+
+                currentWhIndex++;
+                if (currentWhIndex < whData.length) {
+                    showFeedback(true, "Corretto! 🎯", `Frase: "${currentWhQuestion.full}"`, () => {
+                        loadWhQuestion();
+                    });
+                } else {
+                    playSound('win');
+                    showFeedback(true, "Tutte le Missioni superate! 🏆", "Sei un Agente dell'Inglese ufficiale! Ora crea la tua carta d'identità.", () => {
+                        startIDCardCreation();
+                    });
+                }
+            } else {
+                playSound('wrong');
+                lives--;
+                updateStatsUI();
+                showFeedback(false, "Non proprio!", `La parola corretta per questa domanda era "${currentWhQuestion.missing}".`, () => {
+                    if (lives <= 0) {
+                        handleGameOver();
+                    }
+                });
+            }
+        }
+
+        // STAGE 4: ID CARD CREATION
+        function startIDCardCreation() {
+            showScreen('screen-id-card');
+        }
+
+        function generateBadge() {
+            const age = document.getElementById('id-age').value || "10";
+            const city = document.getElementById('id-city').value.trim() || "Italy";
+            const color = document.getElementById('id-color').value;
+            const pet = document.getElementById('id-pet').value;
+            const subject = document.getElementById('id-subject').value;
+
+            document.getElementById('badge-avatar').innerText = selectedAvatar;
+            document.getElementById('badge-name').innerText = playerName;
+            document.getElementById('badge-score').innerText = score;
+
+            document.getElementById('badge-age-text').innerText = `I am ${age} years old.`;
+            document.getElementById('badge-city-text').innerText = `I live in ${city}.`;
+            document.getElementById('badge-color-text').innerText = `My favourite colour is ${color}.`;
+            document.getElementById('badge-pet-text').innerText = `I have got ${pet}.`;
+            document.getElementById('badge-subject-text').innerText = `My favourite subject is ${subject}.`;
+
+            showScreen('screen-badge');
+            playSound('win');
+        }
+
+        function speakBadgeText() {
+            const age = document.getElementById('id-age').value || "10";
+            const city = document.getElementById('id-city').value.trim() || "Italy";
+            const color = document.getElementById('id-color').value;
+            const pet = document.getElementById('id-pet').value;
+            const subject = document.getElementById('id-subject').value;
+
+            const fullIntro = `Hello! My name is ${playerName}. I am ${age} years old. I live in ${city}. My favourite colour is ${color}. I have got ${pet}. My favourite subject is ${subject}. Nice to meet you!`;
+            speakText(fullIntro);
+        }
+
+        function handleGameOver() {
+            showFeedback(false, "Missione Fallita! 💔", "Hai finito i cuori disponibili! Vuoi riprovare la missione?", () => {
+                startGame();
+            });
+        }
+
+        function restartGame() {
+            showScreen('screen-welcome');
+        }
+    </script>
+</body>
+</html>
