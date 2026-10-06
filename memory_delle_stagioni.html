@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Il Memory delle Stagioni 🌸☀️🍂❄️</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Fredoka for friendly child-oriented typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Fredoka', 'sans-serif'],
+                    },
+                    colors: {
+                        primavera: '#FFB7B2',
+                        primaveraDark: '#FF70A6',
+                        estate: '#FFD166',
+                        estateDark: '#FF9F1C',
+                        autunno: '#F4A261',
+                        autunnoDark: '#E76F51',
+                        inverno: '#A8DADC',
+                        invernoDark: '#457B9D',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Fredoka', cursive, sans-serif;
+            background: linear-gradient(135deg, #fef9c3 0%, #e0f2fe 50%, #fce7f3 100%);
+            min-height: 100vh;
+            user-select: none;
+        }
+
+        /* 3D Card Flip Effect */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+
+        .card.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 15px -3px rgba(0, 0, 0, 0.15), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        .card-back {
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            border: 4px solid #ffffff;
+        }
+
+        .card-front {
+            transform: rotateY(180deg);
+            border: 4px solid #ffffff;
+        }
+
+        /* Pulse and Bounce Effects */
+        @keyframes celebrate {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.1) rotate(-5deg); }
+            75% { transform: scale(1.1) rotate(5deg); }
+        }
+
+        .matched-anim {
+            animation: celebrate 0.6s ease-in-out;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #f472b6;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen text-slate-800 p-2 sm:p-4">
+
+    <div class="max-w-5xl mx-auto w-full flex-grow flex flex-col items-center">
+        
+        <!-- Header Title Banner -->
+        <header class="w-full text-center py-3 px-4 mb-3 bg-white/80 backdrop-blur-md rounded-3xl shadow-lg border-4 border-yellow-300">
+            <h1 class="text-3xl sm:text-5xl font-black tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-amber-500 to-sky-500 drop-shadow-sm">
+                🌸 Memory delle Stagioni ❄️
+            </h1>
+            <p class="text-sm sm:text-lg text-indigo-700 font-semibold mt-1">
+                Trova le coppie e scopri le 4 stagioni dell'anno!
+            </p>
+        </header>
+
+        <!-- Control Bar & Selectors -->
+        <section class="w-full bg-white/90 backdrop-blur-sm rounded-2xl p-3 sm:p-4 mb-4 shadow-md border-2 border-indigo-100 flex flex-wrap justify-between items-center gap-3">
+            
+            <!-- Season Selector -->
+            <div class="flex items-center gap-2">
+                <span class="text-xs sm:text-sm font-bold text-slate-600 uppercase tracking-wider">Stagione:</span>
+                <select id="seasonSelect" onchange="restartGame()" class="bg-amber-50 border-2 border-amber-300 text-amber-900 text-sm sm:text-base font-bold rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-amber-400 cursor-pointer">
+                    <option value="all" selected>🌈 Tutte le Stagioni</option>
+                    <option value="primavera">🌸 Primavera</option>
+                    <option value="estate">☀️ Estate</option>
+                    <option value="autunno">🍂 Autunno</option>
+                    <option value="inverno">❄️ Inverno</option>
+                </select>
+            </div>
+
+            <!-- Difficulty Selector -->
+            <div class="flex items-center gap-2">
+                <span class="text-xs sm:text-sm font-bold text-slate-600 uppercase tracking-wider">Carte:</span>
+                <select id="difficultySelect" onchange="restartGame()" class="bg-indigo-50 border-2 border-indigo-300 text-indigo-900 text-sm sm:text-base font-bold rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer">
+                    <option value="easy">Facile (8 carte - 4 coppie)</option>
+                    <option value="medium" selected>Medio (12 carte - 6 coppie)</option>
+                    <option value="hard">Completo (16 carte - 8 coppie)</option>
+                </select>
+            </div>
+
+            <!-- Game Stats (Score, Timer, Moves) -->
+            <div class="flex items-center gap-4 sm:gap-6 bg-emerald-50 px-4 py-1.5 rounded-xl border border-emerald-200">
+                <div class="flex items-center gap-1.5" title="Coppie trovate">
+                    <span class="text-xl sm:text-2xl">⭐</span>
+                    <span id="scoreText" class="text-lg sm:text-xl font-black text-emerald-600">0 / 6</span>
+                </div>
+                <div class="flex items-center gap-1.5" title="Mosse effettuate">
+                    <span class="text-xl sm:text-2xl">🐾</span>
+                    <span id="movesText" class="text-lg sm:text-xl font-black text-indigo-600">0</span>
+                </div>
+                <div class="flex items-center gap-1.5" title="Tempo trascorso">
+                    <span class="text-xl sm:text-2xl">⏱️</span>
+                    <span id="timerText" class="text-lg sm:text-xl font-black text-rose-500">00:00</span>
+                </div>
+            </div>
+
+            <!-- Restart Button -->
+            <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+                <button onclick="restartGame()" class="flex items-center gap-1 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-500 hover:to-amber-600 text-white font-black px-4 py-1.5 rounded-xl shadow-md transition-all transform hover:scale-105 active:scale-95 text-sm sm:text-base">
+                    <span>🔄</span> Nuova Partita
+                </button>
+            </div>
+        </section>
+
+        <!-- Game Board Container -->
+        <main class="w-full flex-grow flex items-center justify-center p-2 mb-4">
+            <div id="gameBoard" class="grid grid-cols-3 sm:grid-cols-4 gap-3 sm:gap-4 w-full max-w-4xl min-h-[360px] sm:min-h-[440px] items-stretch justify-items-stretch">
+                <!-- Cards will be dynamically generated by JS -->
+            </div>
+        </main>
+
+        <!-- Educational Season Explorer Section for Primary School -->
+        <section class="w-full bg-white/95 rounded-3xl p-5 shadow-lg border-4 border-indigo-200 my-4">
+            <div class="flex flex-wrap items-center justify-between mb-4 gap-2">
+                <h2 class="text-2xl sm:text-3xl font-black text-indigo-900 flex items-center gap-2">
+                    <span>📖</span> Le 4 Stagioni e i loro elementi
+                </h2>
+                <span class="text-xs sm:text-sm font-semibold bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full">Scuola Primaria • Didattica Digitale</span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                
+                <!-- Primavera -->
+                <div class="bg-gradient-to-b from-pink-100 to-emerald-50 border-3 border-pink-300 rounded-2xl p-4 shadow-sm flex flex-col justify-between hover:shadow-md transition">
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-3xl">🌸</span>
+                            <span class="text-2xl">🦋 🌱 🐝</span>
+                        </div>
+                        <h3 class="text-xl font-black text-pink-700 mb-1">PRIMAVERA</h3>
+                        <p class="text-xs sm:text-sm text-slate-700 leading-relaxed font-semibold">
+                            La natura si sveglia! Sbocciano i fiori 🌸, volano le farfalle 🦋 e le api 🐝 lavorano tra i germogli 🌱.
+                        </p>
+                    </div>
+                    <div class="mt-3 pt-2 border-t border-pink-200 text-xs text-pink-800 font-bold">
+                        Mesi: Marzo - Giugno
+                    </div>
+                </div>
+
+                <!-- Estate -->
+                <div class="bg-gradient-to-b from-amber-100 to-yellow-50 border-3 border-amber-300 rounded-2xl p-4 shadow-sm flex flex-col justify-between hover:shadow-md transition">
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-3xl">☀️</span>
+                            <span class="text-2xl">🍦 🌊 🏖️</span>
+                        </div>
+                        <h3 class="text-xl font-black text-amber-700 mb-1">ESTATE</h3>
+                        <p class="text-xs sm:text-sm text-slate-700 leading-relaxed font-semibold">
+                            Fa molto caldo! C'è un bel sole ☀️, si mangiano i gelati 🍦, si va al mare 🌊 e si gioca sulla spiaggia 🏖️.
+                        </p>
+                    </div>
+                    <div class="mt-3 pt-2 border-t border-amber-200 text-xs text-amber-800 font-bold">
+                        Mesi: Giugno - Settembre
+                    </div>
+                </div>
+
+                <!-- Autunno -->
+                <div class="bg-gradient-to-b from-orange-100 to-amber-50 border-3 border-orange-300 rounded-2xl p-4 shadow-sm flex flex-col justify-between hover:shadow-md transition">
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-3xl">🍂</span>
+                            <span class="text-2xl">🍄 🌰 🎃</span>
+                        </div>
+                        <h3 class="text-xl font-black text-orange-800 mb-1">AUTUNNO</h3>
+                        <p class="text-xs sm:text-sm text-slate-700 leading-relaxed font-semibold">
+                            Le foglie cadono 🍂! Troviamo le castagne 🌰, i funghi 🍄, le zucche 🎃 e ci ripariamo con l'ombrello ☂️.
+                        </p>
+                    </div>
+                    <div class="mt-3 pt-2 border-t border-orange-200 text-xs text-orange-900 font-bold">
+                        Mesi: Settembre - Dicembre
+                    </div>
+                </div>
+
+                <!-- Inverno -->
+                <div class="bg-gradient-to-b from-sky-100 to-cyan-50 border-3 border-sky-300 rounded-2xl p-4 shadow-sm flex flex-col justify-between hover:shadow-md transition">
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-3xl">❄️</span>
+                            <span class="text-2xl">☃️ 🧣 🧤</span>
+                        </div>
+                        <h3 class="text-xl font-black text-sky-800 mb-1">INVERNO</h3>
+                        <p class="text-xs sm:text-sm text-slate-700 leading-relaxed font-semibold">
+                            Fa freddo e cade la neve ❄️! Facciamo il pupazzo ☃️, indossiamo sciarpa 🧣 e guanti 🧤 e beviamo una cioccolata ☕.
+                        </p>
+                    </div>
+                    <div class="mt-3 pt-2 border-t border-sky-200 text-xs text-sky-900 font-bold">
+                        Mesi: Dicembre - Marzo
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="w-full text-center py-3 text-xs sm:text-sm text-slate-600 font-bold">
+            Scuola Primaria • Attività Didattica Classe Prima 🌟
+        </footer>
+    </div>
+
+    <!-- Victory Modal Box -->
+    <div id="victoryModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl border-8 border-yellow-300 max-w-md w-full p-6 text-center shadow-2xl transform transition-all scale-95 opacity-0 duration-300" id="modalCard">
+            <div class="text-6xl mb-2 animate-bounce">🏆</div>
+            <h2 class="text-3xl font-black text-amber-500 mb-1">SUPER BRAVO!</h2>
+            <p class="text-lg font-bold text-slate-700 mb-4">Hai trovato tutte le coppie!</p>
+
+            <div class="bg-amber-50 rounded-2xl p-4 border border-amber-200 mb-6 space-y-2">
+                <div class="flex justify-between items-center text-sm font-bold text-slate-700">
+                    <span>⏱️ Tempo totale:</span>
+                    <span id="finalTime" class="text-indigo-600 text-base font-black">00:00</span>
+                </div>
+                <div class="flex justify-between items-center text-sm font-bold text-slate-700">
+                    <span>🐾 Mosse utilizzate:</span>
+                    <span id="finalMoves" class="text-indigo-600 text-base font-black">0</span>
+                </div>
+                <div class="flex justify-between items-center text-sm font-bold text-slate-700">
+                    <span>🌟 Valutazione:</span>
+                    <span id="finalStars" class="text-xl">⭐⭐⭐</span>
+                </div>
+            </div>
+
+            <div class="flex gap-3 justify-center">
+                <button onclick="closeVictoryModal(); restartGame();" class="w-full bg-gradient-to-r from-emerald-400 to-green-500 hover:from-emerald-500 hover:to-green-600 text-white font-black py-3 rounded-2xl shadow-lg transform active:scale-95 text-lg transition">
+                    Gioca Ancora 🔄
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Canvas for Victory Confetti Animation -->
+    <canvas id="confettiCanvas" class="fixed inset-0 pointer-events-none z-50"></canvas>
+
+    <script>
+        // Comprehensive sets of seasonal cards with rich typical items
+        const SEASONAL_CARDS = {
+            primavera: [
+                { id: 'p_1', name: 'FIORE', emoji: '🌸', season: 'Primavera', bg: 'bg-pink-100', textCol: 'text-pink-600', borderCol: 'border-pink-300' },
+                { id: 'p_2', name: 'FARFALLA', emoji: '🦋', season: 'Primavera', bg: 'bg-emerald-100', textCol: 'text-emerald-700', borderCol: 'border-emerald-300' },
+                { id: 'p_3', name: 'APE', emoji: '🐝', season: 'Primavera', bg: 'bg-yellow-100', textCol: 'text-yellow-700', borderCol: 'border-yellow-400' },
+                { id: 'p_4', name: 'GERMOGLIO', emoji: '🌱', season: 'Primavera', bg: 'bg-green-100', textCol: 'text-green-700', borderCol: 'border-green-400' },
+                { id: 'p_5', name: 'PULCINO', emoji: '🐥', season: 'Primavera', bg: 'bg-amber-100', textCol: 'text-amber-700', borderCol: 'border-amber-300' },
+                { id: 'p_6', name: 'CILIEGIA', emoji: '🍒', season: 'Primavera', bg: 'bg-rose-100', textCol: 'text-rose-700', borderCol: 'border-rose-300' },
+                { id: 'p_7', name: 'ARCOBALENO', emoji: '🌈', season: 'Primavera', bg: 'bg-purple-100', textCol: 'text-purple-700', borderCol: 'border-purple-300' },
+                { id: 'p_8', name: 'NIDO', emoji: '🪹', season: 'Primavera', bg: 'bg-teal-100', textCol: 'text-teal-700', borderCol: 'border-teal-300' }
+            ],
+            estate: [
+                { id: 'e_1', name: 'SOLE', emoji: '☀️', season: 'Estate', bg: 'bg-amber-100', textCol: 'text-amber-600', borderCol: 'border-amber-400' },
+                { id: 'e_2', name: 'GELATO', emoji: '🍦', season: 'Estate', bg: 'bg-orange-100', textCol: 'text-orange-600', borderCol: 'border-orange-300' },
+                { id: 'e_3', name: 'ANGURIA', emoji: '🍉', season: 'Estate', bg: 'bg-red-100', textCol: 'text-red-600', borderCol: 'border-red-400' },
+                { id: 'e_4', name: 'MARE', emoji: '🌊', season: 'Estate', bg: 'bg-sky-100', textCol: 'text-sky-700', borderCol: 'border-sky-300' },
+                { id: 'e_5', name: 'SPIAGGIA', emoji: '🏖️', season: 'Estate', bg: 'bg-yellow-100', textCol: 'text-yellow-700', borderCol: 'border-yellow-300' },
+                { id: 'e_6', name: 'CAPPELLO', emoji: '👒', season: 'Estate', bg: 'bg-emerald-100', textCol: 'text-emerald-700', borderCol: 'border-emerald-300' },
+                { id: 'e_7', name: 'OCCHIALI', emoji: '🕶️', season: 'Estate', bg: 'bg-indigo-100', textCol: 'text-indigo-700', borderCol: 'border-indigo-300' },
+                { id: 'e_8', name: 'CASTELLO', emoji: '🏰', season: 'Estate', bg: 'bg-amber-100', textCol: 'text-amber-700', borderCol: 'border-amber-300' }
+            ],
+            autunno: [
+                { id: 'a_1', name: 'CASTAGNA', emoji: '🌰', season: 'Autunno', bg: 'bg-amber-100', textCol: 'text-amber-800', borderCol: 'border-amber-400' },
+                { id: 'a_2', name: 'FUNGO', emoji: '🍄', season: 'Autunno', bg: 'bg-red-100', textCol: 'text-red-600', borderCol: 'border-red-300' },
+                { id: 'a_3', name: 'ZUCCA', emoji: '🎃', season: 'Autunno', bg: 'bg-orange-100', textCol: 'text-orange-700', borderCol: 'border-orange-400' },
+                { id: 'a_4', name: 'FOGLIA', emoji: '🍂', season: 'Autunno', bg: 'bg-yellow-100', textCol: 'text-yellow-800', borderCol: 'border-yellow-400' },
+                { id: 'a_5', name: 'PIOGGIA', emoji: '🌧️', season: 'Autunno', bg: 'bg-blue-100', textCol: 'text-blue-700', borderCol: 'border-blue-300' },
+                { id: 'a_6', name: 'OMBRELLO', emoji: '☂️', season: 'Autunno', bg: 'bg-purple-100', textCol: 'text-purple-700', borderCol: 'border-purple-300' },
+                { id: 'a_7', name: 'SCOIATTOLO', emoji: '🐿️', season: 'Autunno', bg: 'bg-amber-100', textCol: 'text-amber-900', borderCol: 'border-amber-400' },
+                { id: 'a_8', name: 'UVA', emoji: '🍇', season: 'Autunno', bg: 'bg-fuchsia-100', textCol: 'text-fuchsia-700', borderCol: 'border-fuchsia-300' }
+            ],
+            inverno: [
+                { id: 'i_1', name: 'NEVE', emoji: '❄️', season: 'Inverno', bg: 'bg-sky-100', textCol: 'text-sky-700', borderCol: 'border-sky-300' },
+                { id: 'i_2', name: 'PUPAZZO', emoji: '☃️', season: 'Inverno', bg: 'bg-cyan-100', textCol: 'text-cyan-700', borderCol: 'border-cyan-300' },
+                { id: 'i_3', name: 'SCIARPA', emoji: '🧣', season: 'Inverno', bg: 'bg-rose-100', textCol: 'text-rose-700', borderCol: 'border-rose-300' },
+                { id: 'i_4', name: 'GUANTI', emoji: '🧤', season: 'Inverno', bg: 'bg-emerald-100', textCol: 'text-emerald-700', borderCol: 'border-emerald-300' },
+                { id: 'i_5', name: 'CIOCCOLATA', emoji: '☕', season: 'Inverno', bg: 'bg-amber-100', textCol: 'text-amber-800', borderCol: 'border-amber-400' },
+                { id: 'i_6', name: 'PINGUINO', emoji: '🐧', season: 'Inverno', bg: 'bg-slate-100', textCol: 'text-slate-800', borderCol: 'border-slate-300' },
+                { id: 'i_7', name: 'ALBERO', emoji: '🎄', season: 'Inverno', bg: 'bg-green-100', textCol: 'text-green-700', borderCol: 'border-green-300' },
+                { id: 'i_8', name: 'CALZA', emoji: '🧦', season: 'Inverno', bg: 'bg-red-100', textCol: 'text-red-700', borderCol: 'border-red-300' }
+            ]
+        };
+
+        // Game State Variables
+        let cardsData = [];
+        let flippedCards = [];
+        let matchedPairsCount = 0;
+        let totalPairs = 6;
+        let moves = 0;
+        let timer = 0;
+        let timerInterval = null;
+        let isBoardLocked = false;
+
+        // Initialize / Restart Game
+        function restartGame() {
+            // Reset state
+            clearInterval(timerInterval);
+            timerInterval = null;
+            timer = 0;
+            moves = 0;
+            matchedPairsCount = 0;
+            flippedCards = [];
+            isBoardLocked = false;
+
+            document.getElementById('movesText').textContent = '0';
+            document.getElementById('timerText').textContent = '00:00';
+
+            const selectedSeason = document.getElementById('seasonSelect').value;
+            const diff = document.getElementById('difficultySelect').value;
+
+            let pairsNeeded = 6; // default medium
+            if (diff === 'easy') pairsNeeded = 4;
+            else if (diff === 'medium') pairsNeeded = 6;
+            else if (diff === 'hard') pairsNeeded = 8;
+
+            totalPairs = pairsNeeded;
+            document.getElementById('scoreText').textContent = `0 / ${totalPairs}`;
+
+            // Determine card pool
+            let pool = [];
+            if (selectedSeason === 'all') {
+                // Take representative cards from all seasons
+                Object.keys(SEASONAL_CARDS).forEach(seasonKey => {
+                    pool.push(...SEASONAL_CARDS[seasonKey]);
+                });
+            } else {
+                pool = [...SEASONAL_CARDS[selectedSeason]];
+            }
+
+            // Shuffle pool to pick pairsNeeded items
+            for (let i = pool.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [pool[i], pool[j]] = [pool[j], pool[i]];
+            }
+
+            const selectedTemplates = pool.slice(0, pairsNeeded);
+            
+            // Create pairs (each card template duplicated)
+            let deck = [];
+            selectedTemplates.forEach(item => {
+                deck.push({ ...item, instanceId: item.id + '_a' });
+                deck.push({ ...item, instanceId: item.id + '_b' });
+            });
+
+            // Fisher-Yates Shuffle for the deck
+            for (let i = deck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [deck[i], deck[j]] = [deck[j], deck[i]];
+            }
+
+            cardsData = deck;
+            renderBoard();
+        }
+
+        // Render Cards to DOM
+        function renderBoard() {
+            const board = document.getElementById('gameBoard');
+            board.innerHTML = '';
+
+            // Grid column adjustment based on card count
+            if (totalPairs === 4) {
+                board.className = "grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 w-full max-w-3xl min-h-[360px] items-stretch";
+            } else if (totalPairs === 6) {
+                board.className = "grid grid-cols-3 sm:grid-cols-4 gap-3 sm:gap-4 w-full max-w-4xl min-h-[400px] items-stretch";
+            } else {
+                board.className = "grid grid-cols-4 sm:grid-cols-4 gap-2 sm:gap-3 w-full max-w-4xl min-h-[440px] items-stretch";
+            }
+
+            cardsData.forEach((card, index) => {
+                const cardEl = document.createElement('div');
+                cardEl.className = 'card perspective-1000 h-28 sm:h-36 min-h-[110px] w-full';
+                cardEl.dataset.index = index;
+                cardEl.onclick = () => handleCardClick(index, cardEl);
+
+                cardEl.innerHTML = `
+                    <div class="card-inner">
+                        <div class="card-back flex-col gap-1">
+                            <span class="text-3xl sm:text-4xl text-yellow-300 drop-shadow">❓</span>
+                            <span class="text-[10px] sm:text-xs text-white/90 font-bold tracking-wider uppercase">STAGIONI</span>
+                        </div>
+                        <div class="card-front ${card.bg} border-4 ${card.borderCol} p-2 flex flex-col justify-center items-center">
+                            <span class="text-3xl sm:text-5xl mb-1 transform hover:scale-110 transition-transform">${card.emoji}</span>
+                            <span class="text-xs sm:text-base font-black ${card.textCol} tracking-wide leading-tight uppercase">${card.name}</span>
+                        </div>
+                    </div>
+                `;
+                board.appendChild(cardEl);
+            });
+        }
+
+        // Card Click Handler
+        function handleCardClick(index, cardElement) {
+            if (isBoardLocked) return;
+            if (cardElement.classList.contains('flipped')) return;
+
+            // Start timer on first move
+            if (!timerInterval) {
+                startTimer();
+            }
+
+            // Flip Card
+            cardElement.classList.add('flipped');
+            flippedCards.push({ index, data: cardsData[index], element: cardElement });
+
+            if (flippedCards.length === 2) {
+                moves++;
+                document.getElementById('movesText').textContent = moves;
+                checkMatch();
+            }
+        }
+
+        // Match Logic
+        function checkMatch() {
+            isBoardLocked = true;
+            const [card1, card2] = flippedCards;
+
+            if (card1.data.id === card2.data.id) {
+                // MATCH FOUND!
+                matchedPairsCount++;
+                document.getElementById('scoreText').textContent = `${matchedPairsCount} / ${totalPairs}`;
+
+                setTimeout(() => {
+                    card1.element.classList.add('matched-anim');
+                    card2.element.classList.add('matched-anim');
+
+                    flippedCards = [];
+                    isBoardLocked = false;
+
+                    // Check for Game Win
+                    if (matchedPairsCount === totalPairs) {
+                        setTimeout(handleWin, 600);
+                    }
+                }, 300);
+
+            } else {
+                // NO MATCH
+                setTimeout(() => {
+                    card1.element.classList.remove('flipped');
+                    card2.element.classList.remove('flipped');
+                    flippedCards = [];
+                    isBoardLocked = false;
+                }, 1000);
+            }
+        }
+
+        // Timer Function
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timer++;
+                const mins = Math.floor(timer / 60).toString().padStart(2, '0');
+                const secs = (timer % 60).toString().padStart(2, '0');
+                document.getElementById('timerText').textContent = `${mins}:${secs}`;
+            }, 1000);
+        }
+
+        // Handle Victory
+        function handleWin() {
+            clearInterval(timerInterval);
+
+            const mins = Math.floor(timer / 60).toString().padStart(2, '0');
+            const secs = (timer % 60).toString().padStart(2, '0');
+            document.getElementById('finalTime').textContent = `${mins}:${secs}`;
+            document.getElementById('finalMoves').textContent = moves;
+
+            // Star Rating Calculation
+            let stars = '⭐⭐⭐';
+            if (moves > totalPairs * 2.5) stars = '⭐⭐';
+            if (moves > totalPairs * 3.5) stars = '⭐';
+            document.getElementById('finalStars').textContent = stars;
+
+            // Show Victory Modal & Trigger Confetti
+            const modal = document.getElementById('victoryModal');
+            const modalCard = document.getElementById('modalCard');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modalCard.classList.remove('scale-95', 'opacity-0');
+                modalCard.classList.add('scale-100', 'opacity-100');
+            }, 50);
+
+            launchConfetti();
+        }
+
+        function closeVictoryModal() {
+            const modal = document.getElementById('victoryModal');
+            const modalCard = document.getElementById('modalCard');
+            modalCard.classList.remove('scale-100', 'opacity-100');
+            modalCard.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 200);
+        }
+
+        // Lightweight Confetti Particle Animation
+        function launchConfetti() {
+            const canvas = document.getElementById('confettiCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const particles = [];
+            const colors = ['#f472b6', '#38bdf8', '#facc15', '#4ade80', '#fb923c', '#c084fc'];
+
+            for (let i = 0; i < 120; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height - canvas.height,
+                    size: Math.random() * 10 + 6,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    speedY: Math.random() * 4 + 2,
+                    speedX: Math.random() * 2 - 1,
+                    rotation: Math.random() * 360,
+                    rotSpeed: Math.random() * 6 - 3
+                });
+            }
+
+            let animationFrame;
+            let startTime = Date.now();
+
+            function render() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                particles.forEach(p => {
+                    p.y += p.speedY;
+                    p.x += p.speedX;
+                    p.rotation += p.rotSpeed;
+
+                    ctx.save();
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate((p.rotation * Math.PI) / 180);
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+                    ctx.restore();
+                });
+
+                if (Date.now() - startTime < 4500) {
+                    animationFrame = requestAnimationFrame(render);
+                } else {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    cancelAnimationFrame(animationFrame);
+                }
+            }
+
+            render();
+        }
+
+        // Initialize on Window Load
+        window.onload = function() {
+            restartGame();
+        };
+
+        // Window resize listener for canvas
+        window.onresize = function() {
+            const canvas = document.getElementById('confettiCanvas');
+            if (canvas) {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+        };
+    </script>
+</body>
+</html>
